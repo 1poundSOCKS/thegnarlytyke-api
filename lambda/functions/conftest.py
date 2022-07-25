@@ -6,6 +6,14 @@ def pytest_addoption(parser):
         action="store"
     )
     parser.addoption(
+        "--userdataBucket",
+        action="store"
+    )
+    parser.addoption(
+        "--dataBucket",
+        action="store"
+    )
+    parser.addoption(
         "--email",
         action="store"
     )
@@ -17,6 +25,14 @@ def pytest_addoption(parser):
 @fixture()
 def alias(request):
     return request.config.getoption("--alias")
+
+@fixture()
+def userdataBucket(request):
+    return request.config.getoption("--userdataBucket")
+
+@fixture()
+def dataBucket(request):
+    return request.config.getoption("--dataBucket")
 
 @fixture()
 def email(request):

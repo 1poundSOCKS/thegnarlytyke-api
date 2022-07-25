@@ -6,16 +6,16 @@ from gnarly_load_data.source.lambda_function import lambda_handler as load_data
 function_event_logon = {
   "stageVariables": {
     "lambdaAlias": "",
-    "dataBucket": "dev.data.thegnarlytyke.com",
-    "userdataBucket": "dev.userdata.thegnarlytyke.com"
+    "dataBucket": "",
+    "userdataBucket": ""
   }
 }
 
 function_event_save_data = {
   "stageVariables": {
     "lambdaAlias": "",
-    "dataBucket": "dev.data.thegnarlytyke.com",
-    "userdataBucket": "dev.userdata.thegnarlytyke.com"
+    "dataBucket": "",
+    "userdataBucket": ""
   },
   "queryStringParameters": {
     "id": "test-id",
@@ -27,8 +27,8 @@ function_event_save_data = {
 function_event_load_data = {
   "stageVariables": {
     "lambdaAlias": "",
-    "dataBucket": "dev.data.thegnarlytyke.com",
-    "userdataBucket": "dev.userdata.thegnarlytyke.com"
+    "dataBucket": "",
+    "userdataBucket": ""
   },
   "queryStringParameters": {
     "id": "test-id",
@@ -36,8 +36,10 @@ function_event_load_data = {
   }
 }
 
-def test_lambda(alias,email,password):
+def test_lambda(alias,userdataBucket,dataBucket,email,password):
   function_event_logon["stageVariables"]["lambdaAlias"] = alias
+  function_event_logon["stageVariables"]["userdataBucket"] = userdataBucket
+  function_event_logon["stageVariables"]["dataBucket"] = dataBucket
   function_event_logon["body"] = f'{{"email": "{email}","password": "{password}"}}'
   response = logon(function_event_logon, None)
   status_code = response.get('statusCode')
@@ -49,6 +51,8 @@ def test_lambda(alias,email,password):
   user_token = body.get("user_token")
 
   function_event_save_data["stageVariables"]["lambdaAlias"] = alias
+  function_event_save_data["stageVariables"]["userdataBucket"] = userdataBucket
+  function_event_save_data["stageVariables"]["dataBucket"] = dataBucket
   function_event_save_data["queryStringParameters"]["user_id"] = user_id
   function_event_save_data["queryStringParameters"]["user_token"] = user_token
   response = save_data(function_event_save_data, None)
@@ -58,6 +62,8 @@ def test_lambda(alias,email,password):
   assert status_code == 200 and error == None
 
   function_event_load_data["stageVariables"]["lambdaAlias"] = alias
+  function_event_load_data["stageVariables"]["userdataBucket"] = userdataBucket
+  function_event_load_data["stageVariables"]["dataBucket"] = dataBucket
   function_event_load_data["queryStringParameters"]["user_id"] = user_id
   function_event_load_data["queryStringParameters"]["user_token"] = user_token
   response = load_data(function_event_load_data, None)
