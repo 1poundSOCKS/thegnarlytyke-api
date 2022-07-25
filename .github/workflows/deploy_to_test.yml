@@ -1,0 +1,46 @@
+name: Deploy to test
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  API_DIR: .
+  AWS_REGION: eu-west-2
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    environment: production
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      
+    - uses: actions/setup-python@v2
+
+    - name: Install Python test lib
+      run: pip install pytest
+
+    - name: Install Python AWS client lib
+      run: pip install boto3
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Run Lambda tests
+      env:
+        GNARLY_TEST_EMAIL: ${{ secrets.GNARLY_TEST_EMAIL }}
+        GNARLY_TEST_PASSWORD: ${{ secrets.GNARLY_TEST_PASSWORD }}
+      run: pytest --alias test --email $GNARLY_TEST_EMAIL --password $GNARLY_TEST_PASSWORD
+      working-directory: ${{ env.API_DIR }}/lambda/functions
+
+    - name: Deploy Lambda code updates
+      run: python deploy_to_test.py
+      working-directory: ${{ env.API_DIR }}/lambda/scripts
