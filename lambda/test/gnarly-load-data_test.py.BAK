@@ -1,0 +1,39 @@
+import boto3
+import json
+
+function_name = "gnarly-load-data:dev"
+
+function_payload = {
+  "stageVariables": {
+    "lambdaAlias": "dev",
+    "dataBucket": "dev.data.thegnarlytyke.com",
+    "userdataBucket": "dev.userdata.thegnarlytyke.com"
+  },
+  "queryStringParameters": {
+    "user_id": "dev-user",
+    "user_token": "dev-token",
+    "id": "test-id",
+    "type": "test_type"
+  },
+  "body": "testing..."
+}
+
+def call_lambda():
+    client = boto3.client('lambda')
+
+    response = client.invoke(
+        FunctionName=function_name,
+        Payload=json.dumps(function_payload)
+    )
+
+    return response
+
+def test_lambda():
+    response = call_lambda()
+    payload = response['Payload']
+    payload_string = payload.read().decode("utf-8")
+    payload_obj = json.loads(payload_string)
+    print(payload_string)
+    print("Hello")
+    assert response.get("StatusCode") == 200 and payload_obj.get("errorMessage") == None
+    

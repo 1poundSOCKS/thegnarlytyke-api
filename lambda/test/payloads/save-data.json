@@ -1,0 +1,12 @@
+{
+  "requestContext": {
+    "stage": "dev"
+  },
+  "queryStringParameters": {
+    "user_id": "dev-user",
+    "user_token": "dev-token",
+    "id": "test-id",
+    "type": "test_type"
+  },
+  "body": "testing..."
+}
