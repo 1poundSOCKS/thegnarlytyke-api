@@ -44,4 +44,3 @@ jobs:
     - name: Deploy Lambda code updates
       run: python deploy_to_test.py
       working-directory: ${{ env.API_DIR }}/lambda/scripts
-      
