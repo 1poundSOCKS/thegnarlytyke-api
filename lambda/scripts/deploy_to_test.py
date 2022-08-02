@@ -11,6 +11,7 @@ try:
   DeployToTest("gnarly-authenticate-user","../functions/gnarly_authenticate_user/source")
   DeployToTest("gnarly-load-data","../functions/gnarly_load_data/source")
   DeployToTest("gnarly-save-data","../functions/gnarly_save_data/source")
+  DeployToTest("gnarly-save-image","../functions/gnarly_save_image/source")
 
 except BaseException as err:
   print(f"Failed (error={err})")

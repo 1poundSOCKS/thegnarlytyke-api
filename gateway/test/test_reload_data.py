@@ -1,7 +1,7 @@
 import os
 import requests
 
-def test_gateway(alias,email,password):
+def test_reload(alias,email,password):
   if email == None:
     email = os.environ["GNARLY_TEST_EMAIL"]
   
