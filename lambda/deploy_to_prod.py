@@ -2,7 +2,7 @@ import boto3
 
 client = boto3.client('lambda')
 
-functions = ['gnarly-logon','gnarly-authenticate-user','gnarly-load-data','gnarly-save-data']
+functions = ['gnarly-logon','gnarly-authenticate-user','gnarly-load-data','gnarly-save-data','gnarly-save-image']
 
 for function_name in functions:
   
