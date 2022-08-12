@@ -53,17 +53,27 @@ def lambda_handler(event, context):
     
     s3 = boto3.client('s3')
     object_id = parameters['id']
+    versioned = parameters['versioned']
 
-    filename = "{}.json".format(object_id)
-    data_key = "data/users/{}/{}".format(user_id,filename)
+    default_key = f"{object_id}"
+    default_filename = f"{default_key}.json"
+    default_data_key = f"data/{default_filename}"
+
+    key = f"{object_id}.{user_id}"
+    filename = f"{key}.json"
+    data_key = f"data/{filename}"
     
     object = None
-    try:
-        object = s3.get_object(Bucket=DATA_BUCKET_NAME, Key=data_key)
-    except ClientError:
-        data_key = "data/{}".format(filename)
+
+    if versioned == 'false':
         try:
             object = s3.get_object(Bucket=DATA_BUCKET_NAME, Key=data_key)
+        except ClientError:
+            object = None
+
+    if object == None:
+        try:
+            object = s3.get_object(Bucket=DATA_BUCKET_NAME, Key=default_data_key)
         except ClientError:
             return {
                 "statusCode": 200,
@@ -74,7 +84,7 @@ def lambda_handler(event, context):
                 },
                 "body": json.dumps(
                     {
-                        "error": "data with key '{}' does not exist".format(filename)
+                        "error": "data with key '{}' does not exist".format(default_filename)
                     }
                 )
             }

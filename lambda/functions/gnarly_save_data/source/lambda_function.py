@@ -57,18 +57,17 @@ def lambda_handler(event, context):
 
     s3 = boto3.client('s3')
     object_id = parameters['id']
+    versioned = parameters['versioned']
 
-    filename = "{}.json".format(object_id)
-    data_key = "data/users/{}/{}".format(user_id,filename)
-    
-    datetime_stamp = datetime.datetime.now().strftime("%G%m%d.%H%M%S.%f")
-    backup_data_key = "backup/data/{}.{}.json".format(object_id,datetime_stamp)
-    
-    copy_source={'Bucket':DATA_BUCKET_NAME,'Key':data_key}
-    try:
-        s3.copy_object(CopySource=copy_source,Bucket=DATA_BUCKET_NAME,Key=backup_data_key)
-    except ClientError:
-        print("backup failed")
+    key = f"{object_id}.{user_id}"
+    filename = f"{key}.json"
+    data_key = f"data/{filename}"
+
+    if versioned == 'true':
+        datetime_stamp = datetime.datetime.now().strftime("%G%m%d.%H%M%S.%f")
+        key = f"{object_id}.{datetime_stamp}"
+        filename = f"{key}.json"
+        data_key = f"data/{filename}"
 
     s3.put_object(Bucket=DATA_BUCKET_NAME, Key=data_key, Body=encoded_string)
     
@@ -81,6 +80,7 @@ def lambda_handler(event, context):
         },
         "body": json.dumps(
             {
+                "key": key,
                 "filename": filename
             }
         )
