@@ -38,8 +38,6 @@ def authenticate_user(user_id,user_token,lambda_alias,userdata_bucket):
     
 def lambda_handler(event, context):
 
-    print(event)
-    
     stage_vars = event['stageVariables']
     lambda_alias = stage_vars["lambdaAlias"]
     userdata_bucket = stage_vars["userdataBucket"]
@@ -57,6 +55,25 @@ def lambda_handler(event, context):
     auth_user_error = authenticate_user(user_id,user_token,lambda_alias,userdata_bucket)
     if auth_user_error != None:
         return auth_user_error
+
+    copy_source = {
+        'Bucket': data_bucket,
+        'Key': 'data/crag-index.json'
+    }
+
+    s3 = boto3.resource('s3')
+    bucket = s3.Bucket(data_bucket)
+
+    bucket.copy(copy_source, 'data/crag-index.backup.json')
+
+    s3.Object(data_bucket,'data/crag-index.json').delete()
+    
+    copy_source = {
+        'Bucket': data_bucket,
+        'Key': f'data/crag-index.{user_id}.json'
+    }
+
+    bucket.copy(copy_source, 'data/crag-index.json')
 
     return {
         'statusCode': 200,
