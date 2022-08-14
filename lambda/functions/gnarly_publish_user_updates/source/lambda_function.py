@@ -1,5 +1,7 @@
 import json
 import boto3
+from botocore.errorfactory import ClientError
+import datetime
 
 def authenticate_user(user_id,user_token,lambda_alias,userdata_bucket):
     function_name = "gnarly-authenticate-user:{}".format(lambda_alias)
@@ -64,16 +66,22 @@ def lambda_handler(event, context):
     s3 = boto3.resource('s3')
     bucket = s3.Bucket(data_bucket)
 
-    bucket.copy(copy_source, 'data/crag-index.backup.json')
+    datetime_stamp = datetime.datetime.now().strftime("%G%m%d.%H%M%S.%f")
+    backup_object_id = f'data/crag-index.backup.{user_id}.{datetime_stamp}.json'
 
-    s3.Object(data_bucket,'data/crag-index.json').delete()
-    
+    bucket.copy(copy_source, backup_object_id)
+
     copy_source = {
         'Bucket': data_bucket,
         'Key': f'data/crag-index.{user_id}.json'
     }
 
-    bucket.copy(copy_source, 'data/crag-index.json')
+    response = {}
+
+    try:
+        bucket.copy(copy_source, 'data/crag-index.json')
+    except ClientError:
+        response = {"success":"no updates to publish"}
 
     return {
         'statusCode': 200,
@@ -82,5 +90,5 @@ def lambda_handler(event, context):
             "Access-Control-Allow-Origin": "*",
             "Access-Control-Allow-Methods": "GET"
         },
-        'body': json.dumps({})
+        'body': json.dumps(response)
     }

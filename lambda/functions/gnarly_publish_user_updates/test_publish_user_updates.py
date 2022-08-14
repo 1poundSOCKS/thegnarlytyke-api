@@ -1,7 +1,6 @@
 import json
 from gnarly_logon.source.lambda_function import lambda_handler as logon
 from gnarly_publish_user_updates.source.lambda_function import lambda_handler as publish_user_updates
-from gnarly_load_data.source.lambda_function import lambda_handler as load_data
 
 function_event_logon = {
   "stageVariables": {
@@ -29,7 +28,7 @@ def call_publish_user_updates():
   assert error == None
   return responseBody
 
-def test_lambda(alias,userdataBucket,dataBucket,email,password):
+def test_publish_user_updates(alias,userdataBucket,dataBucket,email,password):
   function_event_logon["stageVariables"]["lambdaAlias"] = alias
   function_event_logon["stageVariables"]["userdataBucket"] = userdataBucket
   function_event_logon["stageVariables"]["dataBucket"] = dataBucket
