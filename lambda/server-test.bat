@@ -1,1 +1,0 @@
-aws lambda invoke --function-name gnarly-save-data --payload file://test/payloads/save-data.json --cli-binary-format raw-in-base64-out test/output/save-data.out.json

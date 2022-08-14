@@ -8,7 +8,7 @@ def DeployToDev(function_name, function_source_dir):
   print(f"Successfully deployed function '{function_name}' (version={version})")
 
 try:
-  functions = ['gnarly-logon','gnarly-authenticate-user','gnarly-load-data','gnarly-save-data','gnarly-save-image']
+  functions = ['gnarly-logon','gnarly-authenticate-user','gnarly-load-data','gnarly-save-data','gnarly-save-image','gnarly-publish-user-updates']
 
   for function_name in functions:
     source_folder = function_name
