@@ -7,6 +7,7 @@ from gnarly_save_image.source.lambda_function import lambda_handler as save_imag
 from gnarly_save_data.source.lambda_function import lambda_handler as save_data
 from gnarly_load_data.source.lambda_function import lambda_handler as load_data
 from gnarly_publish_user_updates.source.lambda_function import lambda_handler as publish_user_updates
+from gnarly_delete_user_updates.source.lambda_function import lambda_handler as delete_user_updates
 
 from image_data_sample import image_data
 
@@ -148,7 +149,40 @@ def call_publish_user_updates(alias,userdataBucket,dataBucket,user_id,user_token
   assert error == None
   return responseBody
 
+def call_delete_user_updates(alias,userdataBucket,dataBucket,user_id,user_token):
+  function_event_delete_user_updates = {
+    "stageVariables": {
+      "dataBucket": "",
+      "userdataBucket": ""
+    },
+    "queryStringParameters": {
+    }
+  }
+
+  function_event_delete_user_updates["stageVariables"]["lambdaAlias"] = alias
+  function_event_delete_user_updates["stageVariables"]["userdataBucket"] = userdataBucket
+  function_event_delete_user_updates["stageVariables"]["dataBucket"] = dataBucket
+  function_event_delete_user_updates["queryStringParameters"]["user_id"] = user_id
+  function_event_delete_user_updates["queryStringParameters"]["user_token"] = user_token
+
+  response = delete_user_updates(function_event_delete_user_updates, None)
+  status_code = response.get('statusCode')
+  assert status_code == 200
+  responseBody = json.loads(response.get('body'))
+  error = responseBody.get("error")
+  assert error == None
+  return responseBody
+
 def test_lambda(alias,userdataBucket,dataBucket,email,password):
+
+  if alias == None:
+    alias = 'dev'
+
+  if userdataBucket == None:
+    userdataBucket = 'dev.userdata.thegnarlytyke.com'
+
+  if dataBucket == None:
+    dataBucket = 'dev.data.thegnarlytyke.com'
 
   # clear the userdata bucket
   s3 = boto3.resource('s3')
@@ -176,12 +210,11 @@ def test_lambda(alias,userdataBucket,dataBucket,email,password):
   user_id = logon_response.get("user_id")
   user_token = logon_response.get("user_token")
 
-  # define a crag id for the tests
+  # save the crag cover image
   crag_id = str(uuid.uuid4())
-
   image_save_file = call_save_image(alias,userdataBucket,dataBucket,user_id,user_token,crag_id,'crag')
 
-  # save a crag
+  # save the crag
   crag_name = 'Baildon Bank'
   crag_key = f'{crag_id}.crag'
   crag_data = f'{{"id":"{crag_id}","name":"{crag_name}"}}'
@@ -211,3 +244,24 @@ def test_lambda(alias,userdataBucket,dataBucket,email,password):
   # publish the user updates
   call_publish_user_updates(alias,userdataBucket,dataBucket,user_id,user_token)
   
+  # save a new crag
+  new_crag_id = str(uuid.uuid4())
+  new_crag_name = 'Almscliff'
+  new_crag_key = f'{new_crag_id}.crag'
+  new_crag_data = f'{{"id":"{new_crag_id}","name":"{new_crag_name}"}}'
+  crag_save_response = call_save_data(alias,userdataBucket,dataBucket,user_id,user_token,new_crag_key,new_crag_data,True)
+  crag_load_key = crag_save_response.get("key")
+
+  # save an updated crag index
+  crag_index_record = f'{{"id": "{new_crag_id}","name": "{new_crag_name}","cragKey":"{crag_load_key}","imageFile":"{image_save_file}"}}'
+  crag_index_data = f'{{"crags": [{crag_index_record}]}}'
+  call_save_data(alias,userdataBucket,dataBucket,user_id,user_token,CRAG_INDEX_KEY,crag_index_data,False)
+
+  # delete the user updates
+  call_delete_user_updates(alias,userdataBucket,dataBucket,user_id,user_token)
+
+  load_crag_index_data = call_load_data(alias,userdataBucket,dataBucket,user_id,user_token,CRAG_INDEX_KEY,False)
+  crags = load_crag_index_data.get("crags")
+  assert len(crags) == 1
+  assert crags[0].get("id") == crag_id
+  assert crags[0].get("name") == crag_name
