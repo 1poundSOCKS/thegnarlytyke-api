@@ -34,13 +34,6 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ env.AWS_REGION }}
 
-    # - name: Run Lambda tests
-    #   env:
-    #     GNARLY_TEST_EMAIL: ${{ secrets.GNARLY_TEST_EMAIL }}
-    #     GNARLY_TEST_PASSWORD: ${{ secrets.GNARLY_TEST_PASSWORD }}
-    #   run: pytest --alias test --userdataBucket test.userdata.thegnarlytyke.com --dataBucket test.data.thegnarlytyke.com --email $GNARLY_TEST_EMAIL --password $GNARLY_TEST_PASSWORD
-    #   working-directory: ${{ env.API_DIR }}/lambda/functions
-
     - name: Deploy Lambda code updates
       run: python deploy_to_test.py
       working-directory: ${{ env.API_DIR }}/lambda/scripts

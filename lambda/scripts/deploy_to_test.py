@@ -9,7 +9,15 @@ def DeployToTest(function_name, function_source_dir):
   UpdateLambdaFunctionAlias(function_name, "test", version)
 
 try:
-  functions = ['gnarly-logon','gnarly-authenticate-user','gnarly-load-data','gnarly-save-data','gnarly-save-image','gnarly-publish-user-updates','gnarly-delete-user-updates']
+  functions = [
+    'gnarly-create-user',
+    'gnarly-logon',
+    'gnarly-authenticate-user',
+    'gnarly-load-data',
+    'gnarly-save-data',
+    'gnarly-save-image',
+    'gnarly-publish-user-updates',
+    'gnarly-delete-user-updates']
 
   for function_name in functions:
     source_folder = function_name
